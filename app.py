@@ -1,6 +1,6 @@
 import streamlit as st
-import pyvista as pv
-from pyvista.plotting.renderer import Renderer
+import pythreejs as p3
+import ipywidgets as widgets
 
 # Set up the Streamlit app layout
 st.title("3D File Viewer")
@@ -15,25 +15,27 @@ if st.button("Upload 3D File"):
 
         # Load the 3D file
         try:
-            mesh = pv.read_buffer(file_contents, file_format=uploaded_file.name.split(".")[-1])
+            geometry = p3.Geometry.from_file(uploaded_file.name, file_contents)
         except Exception as e:
             st.error(f"Error loading the 3D file: {e}")
         else:
-            # Create a PyVista plotter and add the mesh
-            plotter = pv.Plotter(window_size=(800, 600), off_screen=True)
-            plotter.add_mesh(mesh)
+            # Create a 3D view
+            view_width = 800
+            view_height = 600
+            renderer = p3.Renderer(width=view_width, height=view_height)
+            scene = p3.Scene(children=[p3.Mesh(geometry=geometry)])
+            controller = p3.OrbitControls(controlling=scene.camera)
+            renderer.camera = scene.camera
+            renderer.controls = [controller]
+            renderer.layout.height = f"{view_height}px"
+            renderer.layout.width = f"{view_width}px"
 
-            # Set up plotter settings
-            plotter.enable_eye_dome_lighting()
-            plotter.background_color = "white"
-
-            # Render the scene and capture a screenshot
-            plotter.show()
-            screenshot = plotter.screenshot()
+            # Create an IPyWidget container to display the 3D view
+            container = widgets.HBox([renderer])
 
             # Display the 3D view
             st.subheader("3D View")
-            st.image(screenshot, caption="3D View")
+            st.write(container)
 
 # Display information about the 3D file viewer
 st.subheader("About the 3D File Viewer")
