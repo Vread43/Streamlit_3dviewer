@@ -1,5 +1,5 @@
 import streamlit as st
-import pythreejs as p3
+import pyvista as pv
 
 # Set up the Streamlit app layout
 st.title("3D File Viewer")
@@ -14,20 +14,22 @@ if st.button("Upload 3D File"):
 
         # Load the 3D file
         try:
-            geometry = p3.Geometry.from_file(uploaded_file.name, file_contents)
+            mesh = pv.read_buffer(file_contents, file_format=uploaded_file.name.split(".")[-1])
         except Exception as e:
             st.error(f"Error loading the 3D file: {e}")
         else:
-            # Create a scene with a mesh
-            scene = p3.Scene(children=[p3.Mesh(geometry=geometry)])
-            controller = p3.OrbitControls(controlling=scene.camera)
-            renderer = p3.Renderer(scene=scene, camera=scene.camera, controls=[controller], width=800, height=600)
+            # Create a PyVista plotter and add the mesh
+            plotter = pv.Plotter(notebook=False)
+            plotter.add_mesh(mesh)
+
+            # Set up plotter settings
+            plotter.enable_eye_dome_lighting()
+            plotter.background_color = "white"
 
             # Display the 3D view
             st.subheader("3D View")
-            st.write(renderer)
+            st.write(plotter.show(screenshot=True))
 
 # Display information about the 3D file viewer
 st.subheader("About the 3D File Viewer")
 st.write("The 3D file viewer in this tool allows you to upload and view 3D files in formats such as OBJ, STL, or PLY. After uploading a valid 3D file, a 3D view will be displayed where you can rotate, pan, and zoom to explore the object.")
-
