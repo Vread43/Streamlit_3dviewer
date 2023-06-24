@@ -1,5 +1,6 @@
 import streamlit as st
 import pyvista as pv
+from pyvista.plotting.renderer import Renderer
 
 # Set up the Streamlit app layout
 st.title("3D File Viewer")
@@ -19,16 +20,20 @@ if st.button("Upload 3D File"):
             st.error(f"Error loading the 3D file: {e}")
         else:
             # Create a PyVista plotter and add the mesh
-            plotter = pv.Plotter(notebook=False)
+            plotter = pv.Plotter(window_size=(800, 600), off_screen=True)
             plotter.add_mesh(mesh)
 
             # Set up plotter settings
             plotter.enable_eye_dome_lighting()
             plotter.background_color = "white"
 
+            # Render the scene and capture a screenshot
+            plotter.show()
+            screenshot = plotter.screenshot()
+
             # Display the 3D view
             st.subheader("3D View")
-            st.write(plotter.show(screenshot=True))
+            st.image(screenshot, caption="3D View")
 
 # Display information about the 3D file viewer
 st.subheader("About the 3D File Viewer")
