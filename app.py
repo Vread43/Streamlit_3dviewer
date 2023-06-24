@@ -1,6 +1,7 @@
 import streamlit as st
 import pythreejs as p3
 import ipywidgets as widgets
+from io import BytesIO
 
 # Set up the Streamlit app layout
 st.title("3D File Viewer")
@@ -8,14 +9,14 @@ st.subheader("Open and View 3D Files")
 
 # Check if a file is uploaded
 if st.button("Upload 3D File"):
-    uploaded_file = st.file_uploader("Upload a 3D file:", type=["obj", "stl", "ply"])
+    uploaded_file = st.file_uploader("Upload a 3D file:", type=["obj", "stl", "ply"], accept_multiple_files=False, key="file_uploader")
     if uploaded_file is not None:
         file_contents = uploaded_file.read()
         st.success("File uploaded successfully!")
 
         # Load the 3D file
         try:
-            geometry = p3.Geometry.from_file(uploaded_file.name, file_contents)
+            geometry = p3.Geometry.from_file(uploaded_file.name, BytesIO(file_contents))
         except Exception as e:
             st.error(f"Error loading the 3D file: {e}")
         else:
